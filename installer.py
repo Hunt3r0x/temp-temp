@@ -39,13 +39,18 @@ def chaos_client():
     subprocess.run("go install -v github.com/projectdiscovery/chaos-client/cmd/chaos@latest", shell=True, check=True)
     print_colored("[+] chaos-client Installed!", "32")
 
-def httprobe():
-    subprocess.run("go install -v github.com/tomnomnom/httprobe@latest", shell=True, check=True)
-    print_colored("[+] Httprobe Installed!", "32")
+# def httprobe():
+#     subprocess.run("go install -v github.com/tomnomnom/httprobe@latest", shell=True, check=True)
+#     print_colored("[+] Httprobe Installed!", "32")
 
 # def parallel():
 #     subprocess.run("sudo apt-get install parallel -y", shell=True, check=True)
 #     print_colored("[+] Parallel Installed!", "32")
+
+def anew():
+    subprocess.run("go install -v github.com/tomnomnom/anew@latest", shell=True, check=True)
+    print_colored("[+] Anew Installed!", "32")
+
 
 def install_dependencies():
     dependencies = [
@@ -55,8 +60,9 @@ def install_dependencies():
         ("amass", amass),
         ("assetfinder", assetfinder),
         ("chaos", chaos_client),
-        ("httprobe", httprobe),
-        # ("parallel", parallel)
+        # ("httprobe", httprobe),
+        # ("parallel", parallel),
+        ("anew", anew)
     ]
 
     for dependency, installer in dependencies:
@@ -83,4 +89,3 @@ def print_banner():
     install_dependencies()
     print_colored("Installation completed!", "34")
 print_banner()
-
