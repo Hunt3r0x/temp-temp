@@ -76,7 +76,7 @@ def compare_results(domain, previous_file):
     sorted_previous_file = f'output/{domain}/subdomains_previous_sorted.txt'
 
     # Sort the current and previous files
-    run_command(f"sort {current_file} > {sorted_current_file}")
+    run_command(f"sort -u {current_file} > {sorted_current_file}")
     run_command(f"sort {previous_file} > {sorted_previous_file}")
 
     # Compare the sorted files
