@@ -24,11 +24,11 @@ def findomain():
         print_colored("[!] Install Findomain manually: https://github.com/Findomain/Findomain/blob/master/docs/INSTALLATION.md", "31")
 
 def subfinder():
-    subprocess.run("GO111MODULE=on go get -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest", shell=True, check=True)
+    subprocess.run("go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest", shell=True, check=True)
     print_colored("[+] Subfinder Installed!", "32")
 
 def amass():
-    subprocess.run("GO111MODULE=on go install -v github.com/owasp-amass/amass/v3/...@master", shell=True, check=True)
+    subprocess.run("go install -v github.com/owasp-amass/amass/v3/...@master", shell=True, check=True)
     print_colored("[+] Amass Installed!", "32")
 
 def assetfinder():
