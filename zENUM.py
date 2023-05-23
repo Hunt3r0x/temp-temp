@@ -2,7 +2,24 @@ import argparse
 import json
 import os
 import subprocess
+import sys
 import time
+
+def print_banner():
+    banner = r'''
+           █████████ ████     ███ ███     ███ ███       ███
+           ███       ██ ███   ███ ███     ███ ██ ███   ████
+ █████ ███ ███       ███ ███  ███ ███     ███ ███ ███ █ ███
+      ███  ███████   ███  ███ ███ ███     ███ ███  ███  ███
+    ███    ███       ███   ██ ███ ███     ███ ███   ██  ███
+   ███     ███       ███    ██ ██ ███     ███ ███       ███
+ █████████ █████████ ███      ███   ██████    ███       ███Runner v0.1
+    '''
+    print(banner)
+    print("  H1NTR0X01 @71ntr\n")
+    print("Starting recon && Monitoring!")
+    
+print_banner()
 
 def run_command(command):
     try:
@@ -27,10 +44,10 @@ def get_subdomains_bufferover(domain):
     command = f'curl -s "https://dns.bufferover.run/dns?q=.{domain}" | grep {domain} | awk -F, \'{{gsub("\\"\\"", "", $2); print $2}}\' >> output/{domain}/subdomains.txt'
     run_command(command)
 
-# def get_subdomains_findomain(domain):
-#     print(f"[*] Running Findomain for {domain}")
-#     command = f'findomain --target {domain} --unique-output >> output/{domain}/subdomains.txt'
-#     run_command(command)
+def get_subdomains_findomain(domain):
+    print(f"[*] Running Findomain for {domain}")
+    command = f'findomain --target {domain} --unique-output output/{domain}/subdomains.txt'
+    run_command(command)
 
 def get_subdomains_subfinder(domain):
     print(f"[*] Running SubFinder for {domain}")
@@ -59,8 +76,8 @@ def compare_results(domain, previous_file):
     sorted_previous_file = f'output/{domain}/subdomains_previous_sorted.txt'
 
     # Sort the current and previous files
-    run_command(f"sort -u {current_file} > {sorted_current_file}")
-    run_command(f"sort -u {previous_file} > {sorted_previous_file}")
+    run_command(f"sort {current_file} > {sorted_current_file}")
+    run_command(f"sort {previous_file} > {sorted_previous_file}")
 
     # Compare the sorted files
     command = f"comm -13 {sorted_previous_file} {sorted_current_file} >> output/{domain}/diff.txt"
@@ -74,6 +91,7 @@ def compare_results(domain, previous_file):
         print(diff_output)
         save_new_subdomains(diff_output, current_file)
         send_notification(f"New subdomains found for {domain}:\n{diff_output}")
+        os.replace(current_file, previous_file)
     else:
         os.remove(current_file)
         print("[*] No new subdomains found.")
@@ -84,7 +102,7 @@ def compare_results(domain, previous_file):
 
 def save_new_subdomains(new_subdomains, current_file):
     with open(current_file, "a") as file:
-        file.write("\n" + new_subdomains)
+        file.write(new_subdomains)
 
 def send_notification(message):
     with open("config.json") as config_file:
@@ -108,35 +126,38 @@ def send_telegram_notification(token, chat_id, message):
     run_command(command)
 
 def main(domain, sleep_duration, run_continuously):
+    if not domain:
+        print("Please provide a target domain using the -d/--domain argument.")
+        return
+
     print(f"[*] Running subdomain enumeration for {domain}")
+
     if not os.path.exists(f"output/{domain}"):
         os.makedirs(f"output/{domain}")
 
     previous_file = f'output/{domain}/subdomains.txt'
 
-    if run_continuously and os.path.exists(previous_file):
-        print("[*] Resuming from previous scan...")
-    else:
-        print("[*] Starting new scan...")
-        with open(previous_file, 'w') as file:
-            pass
+    try:
+        while True:
+            get_subdomains_wayback(domain)
+            get_subdomains_crt(domain)
+            get_subdomains_bufferover(domain)
+            # get_subdomains_findomain(domain)
+            get_subdomains_subfinder(domain)
+            get_subdomains_amass(domain)
+            get_subdomains_assetfinder(domain)
+            get_subdomains_chaos(domain)
+            compare_results(domain, previous_file)
 
-    while True:
-        get_subdomains_wayback(domain)
-        get_subdomains_crt(domain)
-        get_subdomains_bufferover(domain)
-        # get_subdomains_findomain(domain)
-        get_subdomains_subfinder(domain)
-        get_subdomains_amass(domain)
-        get_subdomains_assetfinder(domain)
-        get_subdomains_chaos(domain)
-        compare_results(domain, previous_file)
+            if not run_continuously:
+                break
 
-        if not run_continuously:
-            break
+            print(f"[*] Sleeping for {sleep_duration} seconds")
+            time.sleep(sleep_duration)
+    except KeyboardInterrupt:
+        print("\nProgram interrupted. Exiting...")
+        sys.exit(0)
 
-        print(f"[*] Sleeping for {sleep_duration} seconds")
-        time.sleep(sleep_duration)
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="zENUM subdomain enumeration and monitoring tool")
