@@ -77,7 +77,7 @@ def compare_results(domain, previous_file):
 
     # Sort the current and previous files
     run_command(f"sort -u {current_file} > {sorted_current_file}")
-    run_command(f"sort {previous_file} > {sorted_previous_file}")
+    run_command(f"sort -u {previous_file} > {sorted_previous_file}")
 
     # Compare the sorted files
     command = f"comm -13 {sorted_previous_file} {sorted_current_file} >> output/{domain}/diff.txt"
