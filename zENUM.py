@@ -117,12 +117,12 @@ def send_notification(message):
         if telegram_token and telegram_chat_id:
             send_telegram_notification(telegram_token, telegram_chat_id, message)
 
-def send_discord_notification(webhook_url, message):
-    command = f'curl -X POST -H "Content-Type: application/json" -d \'{{"content": "{message}"}}\' {webhook_url}'
+def send_discord_notification(discord_webhook_url, message):
+    command = f'curl -X POST -H "Content-Type: application/json" -d \'{{"content": "{message}"}}\' {discord_webhook_url}'
     run_command(command)
 
-def send_telegram_notification(token, chat_id, message):
-    command = f'curl -X POST -H "Content-Type: application/json" -d \'{{"chat_id": "{chat_id}", "text": "{message}"}}\' https://api.telegram.org/bot{token}/sendMessage'
+def send_telegram_notification(telegram_token, telegram_chat_id, message):
+    command = f'curl -X POST -H "Content-Type: application/json" -d \'{{"telegram_chat_id": "{telegram_chat_id}", "text": "{message}"}}\' https://api.telegram.org/bot{telegram_token}/sendMessage'
     run_command(command)
 
 def main(domain, sleep_duration, run_continuously):
