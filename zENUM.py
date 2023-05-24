@@ -16,7 +16,7 @@ def print_banner():
  █████████ █████████ ███      ███   ██████    ███       ███Runner v0.1
     '''
     print(banner)
-    print("  H1NTR0X01 @71ntr\n")
+    print("BY H1NTR0X01 @71ntr\n")
     print("Starting Enumerating && Monitoring!")
     
 print_banner()
