@@ -142,11 +142,11 @@ def main(domain, sleep_duration, run_continuously):
             get_subdomains_wayback(domain)
             get_subdomains_crt(domain)
             get_subdomains_bufferover(domain)
+            get_subdomains_chaos(domain)
             # get_subdomains_findomain(domain)
             get_subdomains_subfinder(domain)
             get_subdomains_amass(domain)
             get_subdomains_assetfinder(domain)
-            get_subdomains_chaos(domain)
             compare_results(domain, previous_file)
 
             if not run_continuously:
