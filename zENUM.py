@@ -4,19 +4,24 @@ import os
 import subprocess
 import sys
 import time
+import requests
 
 def print_banner():
     banner = r'''
-           █████████ ████     ███ ███     ███ ███       ███
-           ███       ██ ███   ███ ███     ███ ██ ███   ████
- █████ ███ ███       ███ ███  ███ ███     ███ ███ ███ █ ███
-      ███  ███████   ███  ███ ███ ███     ███ ███  ███  ███
-    ███    ███       ███   ██ ███ ███     ███ ███   ██  ███
-   ███     ███       ███    ██ ██ ███     ███ ███       ███
- █████████ █████████ ███      ███   ██████    ███       ███Runner v0.1
-    '''
+            ██████████ ██████   █████ █████  █████ ██████   ██████
+           ░░███░░░░░█░░██████ ░░███ ░░███  ░░███ ░░██████ ██████ 
+  █████████ ░███  █ ░  ░███░███ ░███  ░███   ░███  ░███░█████░███ 
+ ░█░░░░███  ░██████    ░███░░███░███  ░███   ░███  ░███░░███ ░███ 
+ ░   ███░   ░███░░█    ░███ ░░██████  ░███   ░███  ░███ ░░░  ░███ 
+   ███░   █ ░███ ░   █ ░███  ░░█████  ░███   ░███  ░███      ░███ 
+  █████████ ██████████ █████  ░░█████ ░░████████   █████     █████
+ ░░░░░░░░░ ░░░░░░░░░░ ░░░░░    ░░░░░   ░░░░░░░░   ░░░░░     ░░░░░ Runner v0.2 ## new testing v
+                                                                  
+                                            BY H1NTR0X01 @71ntr
+                Security is a myth. Hacking is not.
+'''
     print(banner)
-    print("BY H1NTR0X01 @71ntr\n")
+    # print("BY H1NTR0X01 @71ntr\n")
     print("Starting Enumerating && Monitoring!")
     
 print_banner()
@@ -75,11 +80,9 @@ def compare_results(domain, previous_file):
     sorted_current_file = f'output/{domain}/subdomains_sorted.txt'
     sorted_previous_file = f'output/{domain}/subdomains_previous_sorted.txt'
 
-    # Sort the current and previous files
     run_command(f"sort -u {current_file} > {sorted_current_file}")
     run_command(f"sort -u {previous_file} > {sorted_previous_file}")
 
-    # Compare the sorted files
     command = f"comm -13 {sorted_previous_file} {sorted_current_file} >> output/{domain}/diff.txt"
     run_command(command)
 
@@ -90,13 +93,12 @@ def compare_results(domain, previous_file):
         print(f"[*] New subdomains found for {domain}:")
         print(diff_output)
         save_new_subdomains(diff_output, current_file)
-        send_notification(f"New subdomains found for {domain}:\n{diff_output}")
+        send_notification(f"new subdomains found for {domain}\n\n{diff_output}")  # Call send_notification function
         os.replace(current_file, previous_file)
     else:
         os.remove(current_file)
         print("[*] No new subdomains found.")
 
-    # Clean up the sorted files
     os.remove(sorted_current_file)
     os.remove(sorted_previous_file)
 
@@ -107,23 +109,41 @@ def save_new_subdomains(new_subdomains, current_file):
 def send_notification(message):
     with open("config.json") as config_file:
         config = json.load(config_file)
-        discord_webhook_url = config["discord_webhook_url"]
-        telegram_token = config["telegram_token"]
-        telegram_chat_id = config["telegram_chat_id"]
+        discord_webhook_url = config.get("discord_webhook_url")
+        telegram_bot_token = config.get("telegram_bot_token")
+        telegram_chat_id = config.get("telegram_chat_id")
 
         if discord_webhook_url:
             send_discord_notification(discord_webhook_url, message)
 
-        if telegram_token and telegram_chat_id:
-            send_telegram_notification(telegram_token, telegram_chat_id, message)
+        if telegram_bot_token and telegram_chat_id:
+            send_telegram_notification(telegram_bot_token, telegram_chat_id, message)
 
 def send_discord_notification(discord_webhook_url, message):
-    command = f'curl -X POST -H "Content-Type: application/json" -d \'{{"content": "{message}"}}\' {discord_webhook_url}'
-    run_command(command)
+    payload = {
+        "embeds": [
+            {
+                "title": "zENUM",
+                "description": message,
+                "color": 16776960
+            }
+        ]
+    }
+    response = requests.post(discord_webhook_url, json=payload)
+    if response.status_code != 204:
+        print(f"Failed to send Discord notification. Error: {response.text}")
+
+
 
 def send_telegram_notification(telegram_token, telegram_chat_id, message):
-    command = f'curl -X POST -H "Content-Type: application/json" -d \'{{"telegram_chat_id": "{telegram_chat_id}", "text": "{message}"}}\' https://api.telegram.org/bot{telegram_token}/sendMessage'
-    run_command(command)
+    payload = {
+        "chat_id": telegram_chat_id,
+        "text": message.replace(".", "\\."),  # Escape the '.' character with '\\'
+        "parse_mode": "MarkdownV2"  # Optional: Change to "HTML" for HTML formatting
+    }
+    response = requests.post(f"https://api.telegram.org/bot{telegram_token}/sendMessage", json=payload)
+    if response.status_code != 200:
+        print(f"Failed to send Telegram notification. Error: {response.text}")
 
 def main(domain, sleep_duration, run_continuously):
     if not domain:
@@ -140,12 +160,12 @@ def main(domain, sleep_duration, run_continuously):
     try:
         while True:
             get_subdomains_wayback(domain)
-            get_subdomains_crt(domain)
-            get_subdomains_bufferover(domain)
-            get_subdomains_chaos(domain)
-            get_subdomains_subfinder(domain)
-            get_subdomains_amass(domain)
-            get_subdomains_assetfinder(domain)
+            # get_subdomains_crt(domain)
+            # get_subdomains_bufferover(domain)
+            # get_subdomains_chaos(domain)
+            # get_subdomains_subfinder(domain)
+            # get_subdomains_amass(domain)
+            # get_subdomains_assetfinder(domain)
             # get_subdomains_findomain(domain)
             compare_results(domain, previous_file)
 
