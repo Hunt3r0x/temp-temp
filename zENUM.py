@@ -17,7 +17,7 @@ def print_banner():
     '''
     print(banner)
     print("  H1NTR0X01 @71ntr\n")
-    print("Starting recon && Monitoring!")
+    print("Starting Enumerating && Monitoring!")
     
 print_banner()
 
